@@ -4,20 +4,15 @@ import string
 import time
 import os
 from urllib.parse import urlparse
-from dotenv import load_dotenv
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 # ===============================
-# Load environment variables
+# Scraper API Key (Inlined)
 # ===============================
-load_dotenv()
-SCRAPERAPI_KEY = os.getenv("SCRAPERAPI_KEY")
-
-if not SCRAPERAPI_KEY:
-    raise ValueError("SCRAPERAPI_KEY not found in .env file.")
+SCRAPERAPI_KEY = "95f5749b80c58ae27c7972cf48377855"  # ⚠️ Do not commit this key to public repos!
 
 # ===============================
 # Utility Functions
@@ -44,6 +39,9 @@ def find_user_by_weburl(weburl, users_json='users.json'):
             if extract_base_domain(u['weburl']) == base:
                 return u
     return None
+
+# ... everything else remains unchanged ...
+
 
 # ===============================
 # Chrome Driver Setup
