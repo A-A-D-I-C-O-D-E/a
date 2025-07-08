@@ -4,15 +4,16 @@ import string
 import time
 import os
 from urllib.parse import urlparse
+
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 # ===============================
-# Scraper API Key (Inlined)
+# Inline API Key
 # ===============================
-SCRAPERAPI_KEY = "95f5749b80c58ae27c7972cf48377855"  # ⚠️ Do not commit this key to public repos!
+SCRAPERAPI_KEY = "95f5749b80c58ae27c7972cf48377855"  # <- Replace with your key
 
 # ===============================
 # Utility Functions
@@ -39,9 +40,6 @@ def find_user_by_weburl(weburl, users_json='users.json'):
             if extract_base_domain(u['weburl']) == base:
                 return u
     return None
-
-# ... everything else remains unchanged ...
-
 
 # ===============================
 # Chrome Driver Setup
@@ -90,7 +88,7 @@ def smart_send_keys(driver, field_label, value, timeout=20):
             elem.clear()
             elem.send_keys(value)
             return True
-        except Exception:
+        except:
             continue
 
     os.makedirs("debug_output", exist_ok=True)
@@ -128,34 +126,6 @@ def click_login_button(driver):
     return False
 
 # ===============================
-# Navigate to Create User Page
-# ===============================
-
-def navigate_to_create_user(driver):
-    selectors = [
-        (By.LINK_TEXT, "Create User"),
-        (By.PARTIAL_LINK_TEXT, "Create"),
-        (By.XPATH, "//a[contains(text(), 'Create User')]"),
-        (By.XPATH, "//button[contains(text(), 'Create')]"),
-        (By.XPATH, "//button[contains(text(), 'Add Client')]"),
-        (By.XPATH, "//span[contains(text(), 'Create')]"),
-        (By.CSS_SELECTOR, "a.btn-create"),
-        (By.CSS_SELECTOR, "button.btn-create"),
-    ]
-
-    for by, selector in selectors:
-        try:
-            element = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((by, selector)))
-            element.click()
-            time.sleep(2)
-            return True
-        except:
-            continue
-
-    driver.save_screenshot("debug_output/create_user_not_found.png")
-    return False
-
-# ===============================
 # Main Bot Logic
 # ===============================
 
@@ -172,8 +142,19 @@ def process_user_bot(client_username, weburl):
 
     try:
         driver.get(site_data['weburl'])
-        time.sleep(10)
+        time.sleep(5)
 
+        # 🔴 Site down check
+        if "This site can’t be reached" in driver.page_source or "ERR_NAME_NOT_RESOLVED" in driver.page_source:
+            os.makedirs("debug_output", exist_ok=True)
+            driver.save_screenshot("debug_output/site_down.png")
+            print("[ERROR] Site appears to be unreachable.")
+            return {
+                "error": "Site is down or unreachable",
+                "weburl": site_data['weburl']
+            }
+
+        # Handle iframe login
         if not driver.find_elements(By.ID, "username"):
             for iframe in driver.find_elements(By.TAG_NAME, "iframe"):
                 try:
@@ -250,4 +231,3 @@ def process_user_bot(client_username, weburl):
         return None
     finally:
         driver.quit()
-
