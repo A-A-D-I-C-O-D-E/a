@@ -45,7 +45,7 @@ def find_user_by_weburl(weburl, users_json='users.json'):
 # Chrome Driver Setup
 # ===============================
 
-def get_driver(headless=True):
+def get_driver(headless=False):
     proxy = f"http://scraperapi.proxy:8001?api_key={SCRAPERAPI_KEY}"
     options = uc.ChromeOptions()
     options.add_argument(f'--proxy-server={proxy}')
@@ -144,7 +144,7 @@ def process_user_bot(client_username, weburl):
         driver.get(site_data['weburl'])
         time.sleep(5)
 
-        # 🔴 Site down check
+        # Site down check
         if "This site can’t be reached" in driver.page_source or "ERR_NAME_NOT_RESOLVED" in driver.page_source:
             os.makedirs("debug_output", exist_ok=True)
             driver.save_screenshot("debug_output/site_down.png")
